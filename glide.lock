@@ -1,0 +1,10 @@
+hash: 898914ac70ff262902b119e83d622911c4f1c0e5b4ffc2331b735cf6c9e00451
+updated: 2018-04-19T17:13:04.232223757+08:00
+imports:
+- name: github.com/fatih/color
+  version: 507f6050b8568533fb3f5504de8e5205fa62a114
+- name: github.com/parnurzeal/gorequest
+  version: a578a48e8d6ca8b01a3b18314c43c6716bb5f5a3
+- name: github.com/tidwall/gjson
+  version: 01f00f129617a6fe98941fb920d6c760241b54d2
+testImports: []
