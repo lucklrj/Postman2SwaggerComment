@@ -1,4 +1,4 @@
-# web_monitor
+# p2s
 
 安装
 bin/glide install
