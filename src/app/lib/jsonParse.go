@@ -6,11 +6,12 @@ import (
 )
 
 type Request struct {
-	Name   string
-	Method string
-	Host   string
-	Path   string
-	Query  []map[string]string
+	Name     string
+	Method   string
+	Host     string
+	Path     string
+	Response string
+	Query    []map[string]string
 }
 
 var AllRequest []Request
@@ -36,7 +37,8 @@ func ParseRequest(body gjson.Result, ParentName string) {
 	host := body.Get("request.url.protocol").String() + "://" + joinArrayFromInterface(body.Get("request.url.host").Value(), ".")
 	path := joinArrayFromInterface(body.Get("request.url.path").Value(), "/")
 	query := parseQuery(body.Get("request.url.query").Value().([]interface{}))
-	AllRequest = append(AllRequest, Request{Name: name, Method: method, Host: host, Path: path, Query: query})
+	Response := body.Get("response.0.body").String()
+	AllRequest = append(AllRequest, Request{Name: name, Method: method, Host: host, Path: path, Query: query, Response: Response})
 	
 }
 func joinArrayFromInterface(data interface{}, sign string) string {

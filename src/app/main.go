@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"fmt"
 	"io/ioutil"
 	"app/lib"
 )
@@ -16,6 +15,4 @@ func main() {
 	lib.FindRequest(string(fileContent), "")
 	
 	lib.ErrorPut(err)
-	
-	fmt.Println(lib.AllRequest)
 }
