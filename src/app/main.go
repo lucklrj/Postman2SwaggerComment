@@ -2,8 +2,9 @@ package main
 
 import (
 	"os"
-	"io/ioutil"
 	"app/lib"
+	"io/ioutil"
+	"fmt"
 )
 
 func main() {
@@ -15,4 +16,13 @@ func main() {
 	lib.FindRequest(string(fileContent), "")
 	
 	lib.ErrorPut(err)
+	
+	requestNum := len(lib.AllRequest)
+	fmt.Println(requestNum)
+	i := 0
+	for i < requestNum {
+		comment := lib.MakeComment(lib.AllRequest[i])
+		fmt.Println(comment)
+		i = i + 1
+	}
 }

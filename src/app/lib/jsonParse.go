@@ -5,13 +5,20 @@ import (
 	"reflect"
 )
 
+type Parameter struct {
+	Key         string
+	Value       string
+	Description string
+	Type        string
+}
+
 type Request struct {
 	Name     string
 	Method   string
 	Host     string
 	Path     string
 	Response string
-	Query    []map[string]string
+	Query    []Parameter
 }
 
 var AllRequest []Request
@@ -54,30 +61,47 @@ func joinArrayFromInterface(data interface{}, sign string) string {
 	return returnString
 }
 
-func parseQuery(data []interface{}) []map[string]string {
-	returnMap := make([] map[string]string, 0)
+func parseQuery(data []interface{}) (formatQuery []Parameter) {
+	var singleParameter Parameter
+	
 	for _, singlePoint := range data {
-		singleMap := make(map[string]string)
+		
 		singeData := singlePoint.(map[string]interface{})
+		singleParameter = Parameter{}
+		
 		for key, value := range singeData {
+			
+			singleValue := ""
+			singleType := ""
 			if reflect.TypeOf(value) == nil {
-				continue
-			}
-			if reflect.TypeOf(value).String() == "string" {
-				singleMap[key] = value.(string)
-			}
-			if reflect.TypeOf(value).String() == "bool" {
+				singleValue = ""
+				singleType = "string"
+			} else if reflect.TypeOf(value).String() == "string" {
+				singleValue = value.(string)
+				singleType = "string"
+			} else if reflect.TypeOf(value).String() == "bool" {
 				if value.(bool) == true {
-					singleMap[key] = "true"
+					singleValue = "true"
 				} else {
-					singleMap[key] = "false"
+					singleValue = "false"
 				}
-				
+				singleType = "bool"
 			}
+			
+			switch key {
+			case "key":
+				singleParameter.Key = singleValue
+			case "value":
+				singleParameter.Value = singleValue
+			case "description":
+				singleParameter.Description = singleValue
+			}
+			singleParameter.Type = singleType
+			
 		}
-		returnMap = append(returnMap, singleMap)
+		formatQuery = append(formatQuery, singleParameter)
 	}
-	return returnMap
+	return formatQuery
 }
 func setName(prefixName string, name string) string {
 	if prefixName == "" {
