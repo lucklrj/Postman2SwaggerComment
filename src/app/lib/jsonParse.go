@@ -12,11 +12,17 @@ type Parameter struct {
 	Type        string
 }
 
+type Body struct {
+	Mode    string
+	Content string
+}
+
 type Request struct {
 	Name     string
 	Method   string
 	Host     string
 	Path     string
+	Body     Body
 	Response string
 	Query    []Parameter
 }
@@ -45,7 +51,21 @@ func ParseRequest(body gjson.Result, ParentName string) {
 	path := joinArrayFromInterface(body.Get("request.url.path").Value(), "/")
 	query := parseQuery(body.Get("request.url.query").Value().([]interface{}))
 	Response := body.Get("response.0.body").String()
-	AllRequest = append(AllRequest, Request{Name: name, Method: method, Host: host, Path: path, Query: query, Response: Response})
+	
+	bodyRequest := Body{}
+	
+	bodyMode := body.Get("request.body.mode")
+	if bodyMode.Exists() {
+		bodyRequest.Mode = bodyMode.String()
+		if bodyMode.String() == "raw" {
+			bodyRequest.Content = body.Get("request.body.raw").String()
+		} else if bodyMode.String() == "formdata" {
+			bodyRequest.Content = body.Get("request.body.formdata").String()
+		} else if bodyMode.String() == "urlencoded" {
+			bodyRequest.Content = body.Get("request.body.urlencoded").String()
+		}
+	}
+	AllRequest = append(AllRequest, Request{Name: name, Method: method, Host: host, Path: path, Query: query, Response: Response, Body: bodyRequest})
 	
 }
 func joinArrayFromInterface(data interface{}, sign string) string {
