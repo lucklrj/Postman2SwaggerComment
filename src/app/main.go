@@ -8,14 +8,13 @@ import (
 )
 
 func main() {
-	file, err := os.OpenFile("/Users/mxj/1.json", os.O_RDONLY, os.ModePerm)
+	file, err := os.OpenFile("/Users/mxj/test/test.json", os.O_RDONLY, os.ModePerm)
 	lib.ErrorPut(err)
 	defer file.Close()
 	
 	fileContent, err := ioutil.ReadAll(file)
 	lib.FindRequest(string(fileContent), "")
 	lib.ErrorPut(err)
-	
 	requestNum := len(lib.AllRequest)
 	
 	i := 0

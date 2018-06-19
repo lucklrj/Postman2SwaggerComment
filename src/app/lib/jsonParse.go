@@ -10,11 +10,12 @@ type Parameter struct {
 	Value       string
 	Description string
 	Type        string
+	FieldType   string
 }
 
 type Body struct {
 	Mode    string
-	Content string
+	Content interface{}
 }
 
 type Request struct {
@@ -60,9 +61,9 @@ func ParseRequest(body gjson.Result, ParentName string) {
 		if bodyMode.String() == "raw" {
 			bodyRequest.Content = body.Get("request.body.raw").String()
 		} else if bodyMode.String() == "formdata" {
-			bodyRequest.Content = body.Get("request.body.formdata").String()
+			bodyRequest.Content = parseQuery(body.Get("request.body.formdata").Value().([]interface{}))
 		} else if bodyMode.String() == "urlencoded" {
-			bodyRequest.Content = body.Get("request.body.urlencoded").String()
+			bodyRequest.Content = parseQuery(body.Get("request.body.urlencoded").Value().([]interface{}))
 		}
 	}
 	AllRequest = append(AllRequest, Request{Name: name, Method: method, Host: host, Path: path, Query: query, Response: Response, Body: bodyRequest})
@@ -115,7 +116,10 @@ func parseQuery(data []interface{}) (formatQuery []Parameter) {
 				singleParameter.Value = singleValue
 			case "description":
 				singleParameter.Description = singleValue
+			case "type":
+				singleParameter.FieldType = singleValue
 			}
+			
 			singleParameter.Type = singleType
 			
 		}
