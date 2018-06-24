@@ -2,8 +2,6 @@ package lib
 
 import (
 	"strings"
-	"fmt"
-	"os"
 	"github.com/tidwall/gjson"
 )
 
@@ -11,8 +9,6 @@ type LineComent struct {
 	Content   string
 	IndentNum int
 }
-
-var Comment []LineComent
 
 type AllComment []SingleComment
 
@@ -57,11 +53,11 @@ func MakeComment(singeRequest Request) []string {
 	comment = append(comment, blankRepeat(blankIndex)+"tags={\""+tags+"\"},")
 	
 	//path
-	comment = append(comment, blankRepeat(blankIndex)+"path=\""+singeRequest.Path+",")
+	comment = append(comment, blankRepeat(blankIndex)+"path=\""+singeRequest.Path+"\",")
 	
 	//summary
 	summary := strings.Replace(singeRequest.Name, "/", "-", -1)
-	comment = append(comment, blankRepeat(blankIndex)+"summary=\""+summary+",")
+	comment = append(comment, blankRepeat(blankIndex)+"summary=\""+summary+"\",")
 	
 	//Parameter
 	parameterIndex := 0
@@ -72,73 +68,38 @@ func MakeComment(singeRequest Request) []string {
 		comment = append(comment, blankRepeat(blankIndex)+singeParameter)
 		parameterIndex = parameterIndex + 1
 	}
-	
-	//Response
-	fmt.Println(singeRequest.Response)
-	os.Exit(0)
-	return comment
-	
-}
-func ResponseJson2Comemt(json gjson.Result, level int) {
-	json.ForEach(func(key, value gjson.Result) bool {
-		switch value.Type.String() {
-		case "Number":
-			line := LineComent{}
-			
-			thisValue := value.String()
-			thisType := ""
-			if strings.Contains(thisValue, ".") == true {
-				thisType = "float"
-			} else {
-				thisType = "int"
-			}
-			line.Content = "@SWG\\Property( property=\"" + key.String() + "\" , type=\"" + thisType + "\" , example=\"" + thisValue + "\",description=\"填写描述\"),"
-			line.IndentNum = level
-			Comment = append(Comment, line)
-			break
-		
-		case "String":
-			line := LineComent{}
-			thisValue := value.String()
-			thisType := ""
-			if thisValue == "true" || thisValue == "false" {
-				thisType = "bool"
-			} else {
-				thisType = "string"
-			}
-			line.Content = "@SWG\\Property( property=\"" + key.String() + "\" , type=\"" + thisType + "\" , example=\"" + thisValue + "\",description=\"填写描述\"),"
-			line.IndentNum = level
-			Comment = append(Comment, line)
-			break
-		
-		case "JSON":
-			lineStart := LineComent{}
-			lineStart.Content = "@SWG\\Property( property=\"" + key.String() + "\" ,type=\"object\","
-			lineStart.IndentNum = level
-			Comment = append(Comment, lineStart)
-			if value.IsArray() == true {
-				len := len(value.Array())
-				if len == 0 {
-					fmt.Println(key.String() + "不能为空数组")
-					os.Exit(0)
-				} else {
-					value = value.Array()[0]
-				}
-			}
-			ResponseJson2Comemt(value, level+1)
-			
-			lineEnd := LineComent{}
-			lineEnd.Content = "),"
-			lineEnd.IndentNum = level
-			Comment = append(Comment, lineEnd)
+	//Body
+	if singeRequest.Body.Mode == "raw" {
+		comment = append(comment, blankRepeat(blankIndex)+"@SWG\\Schema(")
+		BodyJson2Comemt(gjson.Parse(singeRequest.Body.Content.(string)), blankIndex)
+		for _, singleBodyComment := range BodyComment {
+			comment = append(comment, blankRepeat(blankIndex+singleBodyComment.IndentNum)+singleBodyComment.Content)
 		}
-		//fmt.Println("key", key.String(), reflect.TypeOf(key.String()), value, value.Type.String())
-		
-		return true
-	})
+		comment = append(comment, blankRepeat(blankIndex)+")")
+	} else if singeRequest.Body.Mode == "formdata" || singeRequest.Body.Mode == "urlencoded" {
+		for _, singleBodyParameter := range singeRequest.Body.Content.([]Parameter) {
+			singeBodyParameter := "@SWG\\Parameter(name =\"" + singleBodyParameter.Key + "\", type=\"" + singleBodyParameter.Type + "\", required=true, in=\"body\",description=\"" + singleBodyParameter.Description + "\"),"
+			comment = append(comment, blankRepeat(blankIndex)+singeBodyParameter)
+		}
+	}
+	comment[len(comment)-1] = comment[len(comment)-1] + ","
+	//Response
+	comment = append(comment, blankRepeat(blankIndex)+"@SWG\\Response(")
+	comment = append(comment, blankRepeat(blankIndex+1)+"response=\"200\",")
+	comment = append(comment, blankRepeat(blankIndex+1)+"description=\"接口响应\",")
+	
+	ResponseJson2Comemt(gjson.Parse(singeRequest.Response), blankIndex)
+	for _, singleResponse := range ResponseComment {
+		comment = append(comment, blankRepeat(blankIndex+singleResponse.IndentNum)+singleResponse.Content)
+	}
+	comment = append(comment, blankRepeat(blankIndex)+")")
+	blankIndex = blankIndex - 1
+	comment = append(comment, blankRepeat(blankIndex)+")")
+	return comment
 }
+
 func blankRepeat(num int) string {
-	return strRepeat(" ", num)
+	return strRepeat("  ", num)
 }
 func strRepeat(str string, num int) string {
 	return strings.Repeat(str, num)

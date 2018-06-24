@@ -21,13 +21,13 @@ func main() {
 	
 	json := gjson.Parse(fileContentString)
 	IndentNum := 0
-	lib.ResponseJson2Comemt(json, IndentNum)
+	lib.BodyJson2Comemt(json, IndentNum)
 	
-	len := len(lib.ResponseComment)
+	len := len(lib.BodyComment)
 	
 	i := 0
 	for i < len {
-		fmt.Println(strings.Repeat("    ", lib.ResponseComment[i].IndentNum) + lib.ResponseComment[i].Content)
+		fmt.Println(strings.Repeat("    ", lib.BodyComment[i].IndentNum) + lib.BodyComment[i].Content)
 		i = i + 1
 	}
 }
