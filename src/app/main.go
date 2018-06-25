@@ -25,8 +25,8 @@ func main() {
 			fmt.Println(" *", c)
 		}
 		fmt.Println(" */")
-		os.Exit(0)
-		//fmt.Println(comment)
-		//i = i + 1
+		fmt.Println("")
+		fmt.Println("")
+		i = i + 1
 	}
 }

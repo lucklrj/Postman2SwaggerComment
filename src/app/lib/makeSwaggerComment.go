@@ -39,6 +39,8 @@ type SingleComment struct {
  * )
  **/
 func MakeComment(singeRequest Request) []string {
+	ResponseComment = make([]LineComent, 0)
+	BodyComment = make([]LineComent, 0)
 	
 	comment := make([]string, 0)
 	blankIndex := 0
