@@ -46,6 +46,10 @@ func FindRequest(str string, ParentName string) {
 }
 
 func ParseRequest(body gjson.Result, ParentName string) {
+	if body.Get("name").Value() == nil || body.Get("request").Value() == nil || body.Get("response").Value() == nil {
+		return
+	}
+	
 	name := ParentName + "/" + body.Get("name").String()
 	method := body.Get("request.method").String()
 	host := body.Get("request.url.protocol").String() + "://" + joinArrayFromInterface(body.Get("request.url.host").Value(), ".")

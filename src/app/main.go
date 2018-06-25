@@ -5,10 +5,26 @@ import (
 	"app/lib"
 	"io/ioutil"
 	"github.com/fatih/color"
+	"flag"
 )
 
+var (
+	inputFile  = flag.String("source", "", "Postman 导出的json文件")
+	outputFile = flag.String("output", "", "产生的注释文件")
+)
+
+func init() {
+	flag.Parse()
+	if *inputFile == "" {
+		color.Red("缺少参数：source")
+		os.Exit(0)
+	}
+	if *outputFile == "" {
+		*outputFile = "result.txt"
+	}
+}
 func main() {
-	file, err := os.OpenFile("/Users/mxj/test/test.json", os.O_RDONLY, os.ModePerm)
+	file, err := os.OpenFile(*inputFile, os.O_RDONLY, os.ModePerm)
 	lib.ErrorPut(err)
 	defer file.Close()
 	
@@ -16,7 +32,10 @@ func main() {
 	lib.FindRequest(string(fileContent), "")
 	lib.ErrorPut(err)
 	requestNum := len(lib.AllRequest)
-	
+	if requestNum == 0 {
+		color.Red("没有找到request数据")
+		os.Exit(0)
+	}
 	i := 0
 	commentString := ""
 	for i < requestNum {
@@ -30,14 +49,14 @@ func main() {
 		commentString = joinComment(commentString, "\n\n")
 		i = i + 1
 	}
-	f, err := os.OpenFile("result.txt", os.O_RDWR|os.O_CREATE, 0755)
+	f, err := os.OpenFile(*outputFile, os.O_RDWR|os.O_CREATE, 0755)
+	defer f.Close()
 	if err != nil {
 		color.Red(err.Error())
+	} else {
+		f.WriteString(commentString)
+		color.Green("Done!")
 	}
-	defer f.Close()
-	
-	f.WriteString(commentString)
-	color.Green("Done!")
 }
 
 func joinComment(source, newLine string) string {
