@@ -4,5 +4,7 @@
 -------
 
 注意：
+
 1.需要安装go包管理工具：[glide](https://github.com/Masterminds/glide)
+
 2.部分包需要翻墙，可以设置包的github上的镜像，参考：[go](https://github.com/golang/go)
