@@ -8,3 +8,7 @@
 1.需要安装go包管理工具：[glide](https://github.com/Masterminds/glide)
 
 2.部分包需要翻墙，可以设置包的github上的镜像，参考：[go](https://github.com/golang/go)
+
+3.postman参数没有必填，选填选项，产生的swagger注释文档都设置为required=true，需要手动补充
+
+4.个别字段需要手动补充说明
