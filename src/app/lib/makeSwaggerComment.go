@@ -69,15 +69,18 @@ func MakeComment(singeRequest Request) []string {
 	
 	//Response
 	comment = append(comment, blankRepeat(blankIndex)+"@SWG\\Response(")
-	comment = append(comment, blankRepeat(blankIndex+1)+"response=\"200\",")
-	comment = append(comment, blankRepeat(blankIndex+1)+"description=\"接口响应\",")
+	blankIndex = blankIndex + 1
+	comment = append(comment, blankRepeat(blankIndex)+"response=\"200\",")
+	comment = append(comment, blankRepeat(blankIndex)+"description=\"接口响应\",")
+	comment = append(comment, blankRepeat(blankIndex)+"@SWG\\Schema(")
 	
 	responseComment := make([]LineComent, 0)
 	responseComment = Json2Comemt(gjson.Parse(singeRequest.Response), blankIndex, responseComment)
 	for _, singleResponse := range responseComment {
 		comment = append(comment, blankRepeat(blankIndex+singleResponse.IndentNum)+singleResponse.Content)
 	}
-	
+	comment = append(comment, blankRepeat(blankIndex)+")")
+	blankIndex = blankIndex - 1
 	comment = append(comment, blankRepeat(blankIndex)+")")
 	blankIndex = blankIndex - 1
 	comment = append(comment, blankRepeat(blankIndex)+")")

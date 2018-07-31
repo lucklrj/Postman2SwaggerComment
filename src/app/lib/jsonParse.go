@@ -53,7 +53,7 @@ func ParseRequest(body gjson.Result, ParentName string) {
 	name := ParentName + "/" + body.Get("name").String()
 	method := body.Get("request.method").String()
 	host := body.Get("request.url.protocol").String() + "://" + joinArrayFromInterface(body.Get("request.url.host").Value(), ".")
-	path := joinArrayFromInterface(body.Get("request.url.path").Value(), "/")
+	path := "/" + joinArrayFromInterface(body.Get("request.url.path").Value(), "/")
 	query := parseQuery(body.Get("request.url.query").Value().([]interface{}))
 	Response := body.Get("response.0.body").String()
 	
