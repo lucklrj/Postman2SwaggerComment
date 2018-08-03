@@ -12,3 +12,5 @@
 3.postman参数没有必填，选填选项，产生的swagger注释文档都设置为required=true，需要手动补充
 
 4.个别字段需要手动补充说明
+
+5.postman数据里有data:[]这样的空数据形式，已经转换为data为空的字符串
