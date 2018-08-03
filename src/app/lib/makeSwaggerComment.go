@@ -3,8 +3,6 @@ package lib
 import (
 	"strings"
 	"github.com/tidwall/gjson"
-	"os"
-	"github.com/fatih/color"
 )
 
 type LineComent struct {
@@ -126,25 +124,29 @@ func Json2Comemt(json gjson.Result, level int, responseComment []LineComent) []L
 			break
 		
 		case "JSON":
-			lineStart := LineComent{}
-			lineStart.Content = "@SWG\\Property( property=\"" + key.String() + "\" ,type=\"object\","
-			lineStart.IndentNum = level
-			responseComment = append(responseComment, lineStart)
-			if value.IsArray() == true {
+			if value.IsArray() == true { //返回数据为空时，则设置为空字符串
 				len := len(value.Array())
 				if len == 0 {
-					color.Red("源数据错误：" + key.String() + "不能为空数组")
-					os.Exit(0)
+					line := LineComent{}
+					line.Content = "@SWG\\Property( property=\"data\" , type=\"string\" , example=\"\",description=\"填写描述\"),"
+					line.IndentNum = level
+					responseComment = append(responseComment, line)
+					
 				} else {
 					value = value.Array()[0]
+					
+					lineStart := LineComent{}
+					lineStart.Content = "@SWG\\Property( property=\"" + key.String() + "\" ,type=\"object\","
+					lineStart.IndentNum = level
+					responseComment = append(responseComment, lineStart)
+					responseComment = Json2Comemt(value, level+1, responseComment)
+					
+					lineEnd := LineComent{}
+					lineEnd.Content = "),"
+					lineEnd.IndentNum = level
+					responseComment = append(responseComment, lineEnd)
 				}
 			}
-			responseComment = Json2Comemt(value, level+1, responseComment)
-			
-			lineEnd := LineComent{}
-			lineEnd.Content = "),"
-			lineEnd.IndentNum = level
-			responseComment = append(responseComment, lineEnd)
 		}
 		
 		return true
