@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"github.com/fatih/color"
 	"github.com/tidwall/gjson"
 	"reflect"
 )
@@ -49,20 +50,31 @@ func ParseRequest(body gjson.Result, ParentName string) {
 	if body.Get("name").Value() == nil || body.Get("request").Value() == nil || body.Get("response").Value() == nil {
 		return
 	}
-	
+
 	name := ParentName + "/" + body.Get("name").String()
 	method := body.Get("request.method").String()
-	host := body.Get("request.url.protocol").String() + "://" + joinArrayFromInterface(body.Get("request.url.host").Value(), ".")
-	path := "/" + joinArrayFromInterface(body.Get("request.url.path").Value(), "/")
-	
+
+	hostData := body.Get("request.url.host").Value()
+	if hostData == nil {
+		color.Red(name + "【host】 格式不全，无法解析该请求")
+		return
+	}
+	host := body.Get("request.url.protocol").String() + "://" + joinArrayFromInterface(hostData, ".")
+	path := "/"
+
+	pathData := body.Get("request.url.path").Value()
+	if pathData != nil {
+		path = "/" + joinArrayFromInterface(body.Get("request.url.path").Value(), "/")
+	}
+
 	query := make([]Parameter, 0)
 	if body.Get("request.url.query").Exists() {
 		query = parseQuery(body.Get("request.url.query").Value().([]interface{}))
 	}
 	Response := body.Get("response.0.body").String()
-	
+
 	bodyRequest := Body{}
-	
+
 	bodyMode := body.Get("request.body.mode")
 	if bodyMode.Exists() {
 		bodyRequest.Mode = bodyMode.String()
@@ -75,10 +87,11 @@ func ParseRequest(body gjson.Result, ParentName string) {
 		}
 	}
 	AllRequest = append(AllRequest, Request{Name: name, Method: method, Host: host, Path: path, Query: query, Response: Response, Body: bodyRequest})
-	
+
 }
 func joinArrayFromInterface(data interface{}, sign string) string {
 	returnString := ""
+
 	for index, value := range data.([]interface{}) {
 		if index == 0 {
 			returnString = value.(string)
@@ -86,20 +99,20 @@ func joinArrayFromInterface(data interface{}, sign string) string {
 			returnString = returnString + sign + value.(string)
 		}
 	}
-	
+
 	return returnString
 }
 
 func parseQuery(data []interface{}) (formatQuery []Parameter) {
 	var singleParameter Parameter
-	
+
 	for _, singlePoint := range data {
-		
+
 		singeData := singlePoint.(map[string]interface{})
 		singleParameter = Parameter{}
-		
+
 		for key, value := range singeData {
-			
+
 			singleValue := ""
 			singleType := ""
 			if reflect.TypeOf(value) == nil {
@@ -116,7 +129,7 @@ func parseQuery(data []interface{}) (formatQuery []Parameter) {
 				}
 				singleType = "bool"
 			}
-			
+
 			switch key {
 			case "key":
 				singleParameter.Key = singleValue
@@ -127,9 +140,9 @@ func parseQuery(data []interface{}) (formatQuery []Parameter) {
 			case "type":
 				singleParameter.FieldType = singleValue
 			}
-			
+
 			singleParameter.Type = singleType
-			
+
 		}
 		formatQuery = append(formatQuery, singleParameter)
 	}

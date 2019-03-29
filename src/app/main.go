@@ -1,11 +1,11 @@
 package main
 
 import (
-	"os"
 	"app/lib"
-	"io/ioutil"
-	"github.com/fatih/color"
 	"flag"
+	"github.com/fatih/color"
+	"io/ioutil"
+	"os"
 )
 
 var (
